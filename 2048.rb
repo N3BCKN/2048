@@ -1,16 +1,18 @@
 require 'ruby2d'
 
-WIDTH = 600
-HEIGHT = 600
-GRID = 600/4
-BACKGROUND_COLOR = '#B9AA9E'
-TEXT_COLOR = '#766E65'
+WIDTH             = 600
+TILES_HEIGHT      = 600
+PANEL_HEIGHT      = 100
+GRID              = 600/4
+BACKGROUND_COLOR  = '#B9AA9E'
+TEXT_COLOR        = '#766E65'
 
 class Game
   attr_accessor :tiles, :game_over
 
   def initialize
     @tiles = []
+    @score = 0
     @game_over = false
     generate_tiles
     fill_random_tiles(3)
@@ -19,20 +21,20 @@ class Game
   def draw
     @tiles.each_with_index do |_,col|
       @tiles[col].each_with_index do |_,row|
-        Square.new(x: col * GRID, y: row * GRID, size: GRID - 7, color: tile_colors[@tiles[row][col]])
-        Text.new(@tiles[row][col], x: col * GRID + GRID/3, y: row * GRID + GRID/3, size: GRID/2, color: TEXT_COLOR) if @tiles[row][col] > 0
+        Square.new(x: col * GRID, y: row * GRID + PANEL_HEIGHT, size: GRID - 7, color: tile_colors[@tiles[row][col]])
+        Text.new(@tiles[row][col], x: col * GRID + GRID/3, y: row * GRID + GRID/3 + PANEL_HEIGHT, size: GRID/2, color: TEXT_COLOR) if @tiles[row][col] > 0
       end
     end
+
+    Text.new("Score: #{@score}", x: WIDTH/3, y: PANEL_HEIGHT/2 - 40, size: 30)
+    Text.new("Game over", x: WIDTH/3, y: PANEL_HEIGHT/2, size: 30, color: 'red') if @game_over
   end
 
   def move_up
     @tiles.each_with_index do |_, i|
       tile = [@tiles[0][i], @tiles[1][i], @tiles[2][i], @tiles[3][i]]
       moved_tile = slide(tile)
-      @tiles[0][i] = moved_tile[0]
-      @tiles[1][i] = moved_tile[1]
-      @tiles[2][i] = moved_tile[2]
-      @tiles[3][i] = moved_tile[3]
+      4.times { |n| @tiles[n][i] = moved_tile[n] }
     end
   end 
 
@@ -46,10 +48,7 @@ class Game
     @tiles.each_with_index do |_, i|
       tile = [@tiles[0][i], @tiles[1][i], @tiles[2][i], @tiles[3][i]]
       moved_tile = slide(tile.reverse).reverse
-      @tiles[0][i] = moved_tile[0]
-      @tiles[1][i] = moved_tile[1]
-      @tiles[2][i] = moved_tile[2]
-      @tiles[3][i] = moved_tile[3]
+      4.times { |n| @tiles[n][i] = moved_tile[n] }
     end
   end 
 
@@ -119,6 +118,7 @@ class Game
         if arr[i] == arr[i+1]
           arr[i] *= 2 
           arr[i+1] = 0
+          @score += arr[i]
         end
       end
     end
@@ -134,7 +134,7 @@ end
 
 set title: '2048'
 set width: WIDTH
-set height: HEIGHT
+set height: TILES_HEIGHT + PANEL_HEIGHT
 set background: BACKGROUND_COLOR
 
 game = Game.new
