@@ -73,10 +73,8 @@ set background: BACKGROUND_COLOR
 game = Game.new
 game.draw
 
+on :key_down do |event|
+  p event.key
+end
 
 show
-
-
-# colors = {
-#   0: '#CBC0B4'
-# }
